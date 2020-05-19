@@ -1,0 +1,12 @@
+http://localhost:8081
+
+--
+--
+
+POST /register
+
+{
+    "userName": "test2",
+    "password": "test123",
+    "confirmPassword": "test123"
+}
