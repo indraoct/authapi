@@ -5,6 +5,7 @@ import (
 	"authapi/config"
 	"authapi/server"
 	"fmt"
+	"time"
 
 	"database/sql"
 
@@ -21,6 +22,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	//connection pooling  read : http://go-database-sql.org/connection-pool.html
+	db.SetMaxIdleConns(0)
+	db.SetMaxOpenConns(5)
+	db.SetConnMaxLifetime(time.Minute * 5)
 
 	// Init repo
 	userRepo := userDomain.NewRepository(db)

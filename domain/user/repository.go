@@ -2,6 +2,7 @@ package user
 
 import (
 	"database/sql"
+	"log"
 )
 
 type Repository interface {
@@ -17,6 +18,31 @@ func NewRepository(db *sql.DB) Repository {
 }
 
 func (sqlRepo *sqlRepository) StoreUser(u *User) error {
-	_, err := sqlRepo.db.Exec("INSERT INTO `user`(user_name, password) values (?, ?)", u.UserName, u.Password)
-	return err
+	tx, err := sqlRepo.db.Begin()
+	if err != nil{
+		log.Printf(err.Error())
+		return err
+	}
+	stmt, err := tx.Prepare("INSERT INTO `user`(user_name, password) values (?, ?)")
+	if err != nil{
+		tx.Rollback()
+		log.Printf(err.Error())
+		return err
+	}
+
+	_,err = stmt.Exec(u.UserName,u.Password)
+	if err != nil{
+		tx.Rollback()
+		log.Printf(err.Error())
+		return err
+	}
+
+	err = tx.Commit()
+	if err != nil{
+		tx.Rollback()
+		log.Printf(err.Error())
+		return err
+	}
+
+	return nil
 }
